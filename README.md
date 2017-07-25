@@ -26,4 +26,4 @@ $ go get -d github.com/munisystem/invoker
 
 ## Author
 
-[munisystem](https://github.com/munisystem)
+MIT © [munisystem](https://github.com/munisystem)
