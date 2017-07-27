@@ -24,3 +24,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/mitchellh/cli"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/hashicorp/hcl"
