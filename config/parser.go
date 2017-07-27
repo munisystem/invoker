@@ -1,30 +1,35 @@
 package config
 
-type Database struct {
-	Name string `hcl:"-"`
+import (
+	"fmt"
 
-	Endpoint     string `hcl:"endpoint"`
-	Port         int    `hcl:"port"`
-	User         string `hcl:"user"`
-	Password     string `hcl:"password"`
-	DatabaseName string `hcl:"database_name"`
-}
+	"github.com/hashicorp/hcl"
+	"github.com/hashicorp/hcl/hcl/ast"
+)
 
-type Group struct {
-	Name string `hcl:"-"`
+func parseDatabaseConfig(list *ast.ObjectList) (map[string]*Database, error) {
+	if len(list.Items) == 0 {
+		return nil, nil
+	}
 
-	Policies []string `hcl:"policies"`
-}
+	databases := make(map[string]*Database)
+	for _, item := range list.Items {
+		if len(item.Keys) != 2 {
+			return nil, fmt.Errorf("%s: database must be contained name", item.Pos())
+		}
 
-type Policy struct {
-	Name string `hcl:"-"`
+		var d Database
+		if err := hcl.DecodeObject(&d, item.Val); err != nil {
+			return nil, err
+		}
 
-	Database string   `hcl:"database"`
-	Queries  []string `hcl:"queries"`
-}
+		name := item.Keys[1].Token.Value().(string)
+		if _, exists := databases[name]; exists {
+			return nil, fmt.Errorf("%s: %s is duplicate", item.Pos(), name)
+		}
 
-type User struct {
-	Name string `hcl:"-"`
+		databases[name] = &d
+	}
 
-	Group string `hcl:"group"`
+	return databases, nil
 }
