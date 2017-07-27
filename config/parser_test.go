@@ -1,33 +1,28 @@
 package config
 
 import (
-	"io/ioutil"
-	"path/filepath"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/hcl"
+	"github.com/hashicorp/hcl/hcl/ast"
 )
 
 func TestParseDatabaseConfig(t *testing.T) {
-	path := filepath.Join(fixtureDir, "database.hcl")
-	b, err := ioutil.ReadFile(path)
+	obj, err := hcl.Parse(db)
 	if err != nil {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list, err := loadHcl(string(b))
-	if err != nil {
-		t.Fatalf("got an err: %s", err.Error())
-	}
+	list := obj.Node.(*ast.ObjectList)
 
-	expected, err := parseDatabaseConfig(list)
-	if err != nil {
-		t.Fatalf("got an err: %s", err.Error())
-	}
-
-	actual := map[string]*Database{
+	expected := map[string]*Database{
 		"alice_db": &Database{Endpoint: "alice.example.com", Port: 5432, User: "admin", Password: "admin", DatabaseName: "apple"},
-		"bob_db":   &Database{Endpoint: "bob.example.com", Port: 5432, User: "admin", Password: "admin", DatabaseName: "banana"},
-		"carol_db": &Database{Endpoint: "carol.example.com", Port: 5432, User: "admin", Password: "admin", DatabaseName: "cherry"},
+	}
+
+	actual, err := parseDatabaseConfig(list)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
 	}
 
 	if !reflect.DeepEqual(expected, actual) {
@@ -36,18 +31,14 @@ func TestParseDatabaseConfig(t *testing.T) {
 }
 
 func TestParseDatabaseConfig_emptyName(t *testing.T) {
-	path := filepath.Join(fixtureDir, "database_empty_name.hcl")
-	b, err := ioutil.ReadFile(path)
+	obj, err := hcl.Parse(dbEmptyName)
 	if err != nil {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list, err := loadHcl(string(b))
-	if err != nil {
-		t.Fatalf("got an err: %s", err.Error())
-	}
+	list := obj.Node.(*ast.ObjectList)
 
-	expected := "1:1: database must be contained name"
+	expected := "2:1: database must be contained name"
 	_, actual := parseDatabaseConfig(list)
 	if expected != actual.Error() {
 		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
@@ -55,16 +46,12 @@ func TestParseDatabaseConfig_emptyName(t *testing.T) {
 }
 
 func TestParseDatabaseConfig_duplicateName(t *testing.T) {
-	path := filepath.Join(fixtureDir, "database_duplicate_name.hcl")
-	b, err := ioutil.ReadFile(path)
+	obj, err := hcl.Parse(dbDuplicateName)
 	if err != nil {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list, err := loadHcl(string(b))
-	if err != nil {
-		t.Fatalf("got an err: %s", err.Error())
-	}
+	list := obj.Node.(*ast.ObjectList)
 
 	expected := "3:1: alice_db is duplicate"
 	_, actual := parseDatabaseConfig(list)
@@ -72,3 +59,22 @@ func TestParseDatabaseConfig_duplicateName(t *testing.T) {
 		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
 	}
 }
+
+const db = `
+database "alice_db" {
+	endpoint = "alice.example.com"
+	port = 5432
+	user = "admin"
+	password = "admin"
+	database_name = "apple"
+}
+`
+
+const dbEmptyName = `
+database {}
+`
+
+const dbDuplicateName = `
+database "alice_db" {}
+database "alice_db" {}
+`
