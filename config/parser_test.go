@@ -34,3 +34,41 @@ func TestParseDatabaseConfig(t *testing.T) {
 		t.Fatalf("didn't match struct: expected %v, actual %v", expected, actual)
 	}
 }
+
+func TestParseDatabaseConfig_emptyName(t *testing.T) {
+	path := filepath.Join(fixtureDir, "database_empty_name.hcl")
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	list, err := loadHcl(string(b))
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	expected := "1:1: database must be contained name"
+	_, actual := parseDatabaseConfig(list)
+	if expected != actual.Error() {
+		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
+	}
+}
+
+func TestParseDatabaseConfig_duplicateName(t *testing.T) {
+	path := filepath.Join(fixtureDir, "database_duplicate_name.hcl")
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	list, err := loadHcl(string(b))
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	expected := "3:1: alice_db is duplicate"
+	_, actual := parseDatabaseConfig(list)
+	if expected != actual.Error() {
+		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
+	}
+}

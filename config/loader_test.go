@@ -36,8 +36,9 @@ func TestLoadHcl_badFile(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	_, err = loadHcl(string(b))
-	if err == nil {
-		t.Fatalf("didn't got err")
+	expected := "At 1:5: illegal char"
+	_, actual := loadHcl(string(b))
+	if expected != actual.Error() {
+		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
 	}
 }
