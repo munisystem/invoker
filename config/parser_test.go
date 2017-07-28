@@ -60,6 +60,58 @@ func TestParseDatabaseConfig_duplicateName(t *testing.T) {
 	}
 }
 
+func TestParseGroupConfig(t *testing.T) {
+	obj, err := hcl.Parse(group)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	list := obj.Node.(*ast.ObjectList)
+
+	expected := map[string]*Group{
+		"dev": &Group{Policies: []string{"alice_db_readonly", "bob_db_readonly", "carol_db_writable"}},
+	}
+
+	actual, err := parseGroupConfig(list)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("didn't match struct: expected %v, actual %v", expected, actual)
+	}
+}
+
+func TestParseGroupConfig_emptyName(t *testing.T) {
+	obj, err := hcl.Parse(groupEmptyName)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	list := obj.Node.(*ast.ObjectList)
+
+	expected := "2:1: group must be contained name"
+	_, actual := parseGroupConfig(list)
+	if expected != actual.Error() {
+		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
+	}
+}
+
+func TestParseGroupConfig_duplicateName(t *testing.T) {
+	obj, err := hcl.Parse(groupDuplicateName)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	list := obj.Node.(*ast.ObjectList)
+
+	expected := "3:1: dev is duplicate"
+	_, actual := parseGroupConfig(list)
+	if expected != actual.Error() {
+		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
+	}
+}
+
 const db = `
 database "alice_db" {
 	endpoint = "alice.example.com"
@@ -77,4 +129,23 @@ database {}
 const dbDuplicateName = `
 database "alice_db" {}
 database "alice_db" {}
+`
+
+const group = `
+group "dev" {
+  policies = [
+    "alice_db_readonly",
+    "bob_db_readonly",
+    "carol_db_writable"
+  ]
+}
+`
+
+const groupEmptyName = `
+group {}
+`
+
+const groupDuplicateName = `
+group "dev" {}
+group "dev" {}
 `
