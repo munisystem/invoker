@@ -87,3 +87,30 @@ func parsePolicyConfig(list *ast.ObjectList) (map[string]*Policy, error) {
 
 	return policies, nil
 }
+
+func parseUserConfig(list *ast.ObjectList) (map[string]*User, error) {
+	if len(list.Items) == 0 {
+		return nil, nil
+	}
+
+	users := make(map[string]*User)
+	for _, item := range list.Items {
+		if len(item.Keys) != 2 {
+			return nil, fmt.Errorf("%s: user must be contained name", item.Pos())
+		}
+
+		var u User
+		if err := hcl.DecodeObject(&u, item.Val); err != nil {
+			return nil, err
+		}
+
+		name := item.Keys[1].Token.Value().(string)
+		if _, exists := users[name]; exists {
+			return nil, fmt.Errorf("%s: %s is duplicate", item.Pos(), name)
+		}
+
+		users[name] = &u
+	}
+
+	return users, nil
+}

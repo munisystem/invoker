@@ -171,6 +171,58 @@ func TestParsePolicyConfig_duplicateName(t *testing.T) {
 	}
 }
 
+func TestUserGroupConfig(t *testing.T) {
+	obj, err := hcl.Parse(user)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	list := obj.Node.(*ast.ObjectList)
+
+	expected := map[string]*User{
+		"cat": &User{Group: "core"},
+	}
+
+	actual, err := parseUserConfig(list)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("didn't match struct: expected %v, actual %v", expected, actual)
+	}
+}
+
+func TestParseUserConfig_emptyName(t *testing.T) {
+	obj, err := hcl.Parse(userEmptyName)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	list := obj.Node.(*ast.ObjectList)
+
+	expected := "2:1: user must be contained name"
+	_, actual := parseUserConfig(list)
+	if expected != actual.Error() {
+		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
+	}
+}
+
+func TestParseUserConfig_duplicateName(t *testing.T) {
+	obj, err := hcl.Parse(userDuplicateName)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	list := obj.Node.(*ast.ObjectList)
+
+	expected := "3:1: cat is duplicate"
+	_, actual := parseUserConfig(list)
+	if expected != actual.Error() {
+		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
+	}
+}
+
 const db = `
 database "alice_db" {
 	endpoint = "alice.example.com"
@@ -228,4 +280,19 @@ policy {}
 const policyDuplicateName = `
 policy "alice_db_writable" {}
 policy "alice_db_writable" {}
+`
+
+const user = `
+user "cat" {
+	group = "core"
+}
+`
+
+const userEmptyName = `
+user {}
+`
+
+const userDuplicateName = `
+user "cat" {}
+user "cat" {}
 `

@@ -4,7 +4,7 @@ type Config struct {
 	Databases map[string]*Database
 	Groups    map[string]*Group
 	Policies  map[string]*Policy
-	Users     []*User
+	Users     map[string]*User
 }
 
 type Database struct {
@@ -25,7 +25,5 @@ type Policy struct {
 }
 
 type User struct {
-	Name string `hcl:"-"`
-
 	Group string `hcl:"group"`
 }
