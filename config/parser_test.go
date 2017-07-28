@@ -112,6 +112,65 @@ func TestParseGroupConfig_duplicateName(t *testing.T) {
 	}
 }
 
+func TestPolicyGroupConfig(t *testing.T) {
+	obj, err := hcl.Parse(policy)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	list := obj.Node.(*ast.ObjectList)
+
+	expected := map[string]*Policy{
+		"alice_db_writable": &Policy{
+			Database: "alice_db",
+			Queries: []string{
+				"CREATE ROLE {{ .Name }} WITH LOGIN ENCRYPTED PASSWORD {{ .Password }};",
+				"GRANT ALL ON ALL TABLES IN SCHEMA public TO {{ .Name }};",
+				"GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO {{ .Name }};",
+			},
+		},
+	}
+
+	actual, err := parsePolicyConfig(list)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("didn't match struct: expected %v, actual %v", expected, actual)
+	}
+}
+
+func TestParsePolicyConfig_emptyName(t *testing.T) {
+	obj, err := hcl.Parse(policyEmptyName)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	list := obj.Node.(*ast.ObjectList)
+
+	expected := "2:1: policy must be contained name"
+	_, actual := parsePolicyConfig(list)
+	if expected != actual.Error() {
+		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
+	}
+}
+
+func TestParsePolicyConfig_duplicateName(t *testing.T) {
+	obj, err := hcl.Parse(policyDuplicateName)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	list := obj.Node.(*ast.ObjectList)
+
+	expected := "3:1: alice_db_writable is duplicate"
+	_, actual := parsePolicyConfig(list)
+	if expected != actual.Error() {
+		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
+	}
+}
+
 const db = `
 database "alice_db" {
 	endpoint = "alice.example.com"
@@ -148,4 +207,25 @@ group {}
 const groupDuplicateName = `
 group "dev" {}
 group "dev" {}
+`
+
+const policy = `
+policy "alice_db_writable" {
+  database = "alice_db"
+
+  queries = [
+    "CREATE ROLE {{ .Name }} WITH LOGIN ENCRYPTED PASSWORD {{ .Password }};",
+    "GRANT ALL ON ALL TABLES IN SCHEMA public TO {{ .Name }};",
+    "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO {{ .Name }};"
+  ]
+}
+`
+
+const policyEmptyName = `
+policy {}
+`
+
+const policyDuplicateName = `
+policy "alice_db_writable" {}
+policy "alice_db_writable" {}
 `

@@ -60,3 +60,30 @@ func parseGroupConfig(list *ast.ObjectList) (map[string]*Group, error) {
 
 	return groups, nil
 }
+
+func parsePolicyConfig(list *ast.ObjectList) (map[string]*Policy, error) {
+	if len(list.Items) == 0 {
+		return nil, nil
+	}
+
+	policies := make(map[string]*Policy)
+	for _, item := range list.Items {
+		if len(item.Keys) != 2 {
+			return nil, fmt.Errorf("%s: policy must be contained name", item.Pos())
+		}
+
+		var p Policy
+		if err := hcl.DecodeObject(&p, item.Val); err != nil {
+			return nil, err
+		}
+
+		name := item.Keys[1].Token.Value().(string)
+		if _, exists := policies[name]; exists {
+			return nil, fmt.Errorf("%s: %s is duplicate", item.Pos(), name)
+		}
+
+		policies[name] = &p
+	}
+
+	return policies, nil
+}

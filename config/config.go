@@ -3,7 +3,7 @@ package config
 type Config struct {
 	Databases map[string]*Database
 	Groups    map[string]*Group
-	Policies  []*Policy
+	Policies  map[string]*Policy
 	Users     []*User
 }
 
@@ -20,8 +20,6 @@ type Group struct {
 }
 
 type Policy struct {
-	Name string `hcl:"-"`
-
 	Database string   `hcl:"database"`
 	Queries  []string `hcl:"queries"`
 }
