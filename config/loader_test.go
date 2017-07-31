@@ -9,7 +9,7 @@ import (
 const fixtureDir = "fixture"
 
 func TestLoadFile(t *testing.T) {
-	path := filepath.Join(fixtureDir, "mixed_keys.hcl")
+	path := filepath.Join(fixtureDir, "database.hcl")
 
 	expected := &Config{
 		Databases: map[string]*Database{
@@ -19,26 +19,6 @@ func TestLoadFile(t *testing.T) {
 				User:         "admin",
 				Password:     "admin",
 				DatabaseName: "apple",
-			},
-		},
-		Groups: map[string]*Group{
-			"dev": &Group{
-				Policies: []string{"alice_db_readonly"},
-			},
-		},
-		Policies: map[string]*Policy{
-			"alice_db_readonly": &Policy{
-				Database: "alice_db",
-				Queries: []string{
-					"CREATE ROLE {{ .Name }} WITH LOGIN ENCRYPTED PASSWORD {{ .Password }};",
-					"GRANT SELECT ON ALL TABLES IN SCHEMA public TO {{ .Name }};",
-					"GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO {{ .Name }};",
-				},
-			},
-		},
-		Users: map[string]*User{
-			"alice": &User{
-				Group: "dev",
 			},
 		},
 	}

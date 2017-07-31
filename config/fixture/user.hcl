@@ -1,11 +1,3 @@
-user "cat" {
-  group = "core"
-}
-
-user "dog" {
-  group = "core"
-}
-
-user "rabbit" {
+user "alice" {
   group = "dev"
 }
