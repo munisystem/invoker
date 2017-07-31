@@ -4,10 +4,38 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
+	"strings"
 
 	"github.com/hashicorp/hcl"
 	"github.com/hashicorp/hcl/hcl/ast"
 )
+
+func LoadDir(root string) (*Config, error) {
+	files, err := ioutil.ReadDir(root)
+	if err != nil {
+		return nil, err
+	}
+
+	config := NewConfig()
+	for _, f := range files {
+		name := f.Name()
+		if !strings.HasSuffix(name, ".hcl") {
+			continue
+		}
+
+		c, err := LoadFile(filepath.Join(root, name))
+		if err != nil {
+			return nil, err
+		}
+
+		if err := mergeConfig(c, config); err != nil {
+			return nil, err
+		}
+	}
+
+	return config, nil
+}
 
 func LoadFile(path string) (*Config, error) {
 	b, err := ioutil.ReadFile(path)
