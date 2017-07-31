@@ -1,5 +1,5 @@
 # invoker
-
+[![Build Status](https://travis-ci.org/munisystem/invoker.svg?branch=master)](https://travis-ci.org/munisystem/invoker)
 
 
 ## Description
