@@ -75,6 +75,63 @@ func TestLoadHcl_badFile(t *testing.T) {
 	}
 }
 
+func TestMergeConfig(t *testing.T) {
+	aliceDB := &Database{
+		Endpoint:     "alice.example.com",
+		Port:         5432,
+		User:         "admin",
+		Password:     "admin",
+		DatabaseName: "apple",
+	}
+
+	bobDB := &Database{
+		Endpoint:     "bob.example.com",
+		Port:         5432,
+		User:         "admin",
+		Password:     "admin",
+		DatabaseName: "banana",
+	}
+
+	dst := NewConfig()
+	dst.Databases["alice_db"] = aliceDB
+
+	actual := NewConfig()
+	actual.Databases["bob_db"] = bobDB
+
+	expected := NewConfig()
+	expected.Databases["alice_db"] = aliceDB
+	expected.Databases["bob_db"] = bobDB
+
+	if err := mergeConfig(dst, actual); err != nil {
+		t.Errorf("got an err: %s", err.Error())
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("didn't match struct: expected %v, actual %v", expected, actual)
+	}
+}
+
+func TestMergeConfig_DuplicateName(t *testing.T) {
+	aliceDB := &Database{
+		Endpoint:     "alice.example.com",
+		Port:         5432,
+		User:         "admin",
+		Password:     "admin",
+		DatabaseName: "apple",
+	}
+
+	dst := NewConfig()
+	dst.Databases["alice_db"] = aliceDB
+
+	src := NewConfig()
+	src.Databases["alice_db"] = aliceDB
+
+	expected := "database 'alice_db' is duplicate"
+	if actual := mergeConfig(dst, src); expected != actual.Error() {
+		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
+	}
+}
+
 const databaseRawString = `
 database "alice_db" {
   endpoint = "alice.example.com"

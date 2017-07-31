@@ -27,3 +27,12 @@ type Policy struct {
 type User struct {
 	Group string `hcl:"group"`
 }
+
+func NewConfig() *Config {
+	return &Config{
+		Databases: make(map[string]*Database),
+		Groups:    make(map[string]*Group),
+		Policies:  make(map[string]*Policy),
+		Users:     make(map[string]*User),
+	}
+}

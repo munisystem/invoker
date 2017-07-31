@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 
 	"github.com/hashicorp/hcl"
@@ -70,4 +71,43 @@ func loadHcl(hclText string) (*ast.ObjectList, error) {
 	}
 
 	return list, nil
+}
+
+func mergeConfig(dst, src *Config) error {
+	if len(dst.Databases) > 0 {
+		for k, v := range dst.Databases {
+			if _, ok := src.Databases[k]; ok {
+				return fmt.Errorf("database '%s' is duplicate", k)
+			}
+			src.Databases[k] = v
+		}
+	}
+
+	if len(dst.Groups) > 0 {
+		for k, v := range dst.Groups {
+			if _, ok := src.Groups[k]; ok {
+				return fmt.Errorf("group '%s' is duplicate", k)
+			}
+			src.Groups[k] = v
+		}
+	}
+
+	if len(dst.Policies) > 0 {
+		for k, v := range dst.Policies {
+			if _, ok := src.Policies[k]; ok {
+				return fmt.Errorf("policy '%s' is duplicate", k)
+			}
+			src.Policies[k] = v
+		}
+	}
+
+	if len(dst.Users) > 0 {
+		for k, v := range dst.Users {
+			if _, ok := src.Users[k]; ok {
+				return fmt.Errorf("users '%s' is duplicate", k)
+			}
+			src.Users[k] = v
+		}
+	}
+	return nil
 }
