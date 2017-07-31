@@ -1,6 +1,11 @@
 language: go
 go:
   - '1.8'
+
+sudo: required
+services:
+  - docker
+
 before_install:
   - make dep
 install:
