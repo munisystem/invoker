@@ -14,7 +14,7 @@ func TestParseDatabaseConfig(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list := obj.Node.(*ast.ObjectList)
+	list := obj.Node.(*ast.ObjectList).Filter("database")
 
 	expected := map[string]*Database{
 		"alice_db": &Database{Endpoint: "alice.example.com", Port: 5432, User: "admin", Password: "admin", DatabaseName: "apple"},
@@ -36,9 +36,9 @@ func TestParseDatabaseConfig_emptyName(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list := obj.Node.(*ast.ObjectList)
+	list := obj.Node.(*ast.ObjectList).Filter("database")
 
-	expected := "2:1: database must be contained name"
+	expected := "2:10: database must be contained name"
 	_, actual := parseDatabaseConfig(list)
 	if expected != actual.Error() {
 		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
@@ -51,9 +51,9 @@ func TestParseDatabaseConfig_duplicateName(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list := obj.Node.(*ast.ObjectList)
+	list := obj.Node.(*ast.ObjectList).Filter("database")
 
-	expected := "3:1: alice_db is duplicate"
+	expected := "3:21: alice_db is duplicate"
 	_, actual := parseDatabaseConfig(list)
 	if expected != actual.Error() {
 		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
@@ -66,7 +66,7 @@ func TestParseGroupConfig(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list := obj.Node.(*ast.ObjectList)
+	list := obj.Node.(*ast.ObjectList).Filter("group")
 
 	expected := map[string]*Group{
 		"dev": &Group{Policies: []string{"alice_db_readonly", "bob_db_readonly", "carol_db_writable"}},
@@ -88,9 +88,9 @@ func TestParseGroupConfig_emptyName(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list := obj.Node.(*ast.ObjectList)
+	list := obj.Node.(*ast.ObjectList).Filter("group")
 
-	expected := "2:1: group must be contained name"
+	expected := "2:7: group must be contained name"
 	_, actual := parseGroupConfig(list)
 	if expected != actual.Error() {
 		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
@@ -103,9 +103,9 @@ func TestParseGroupConfig_duplicateName(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list := obj.Node.(*ast.ObjectList)
+	list := obj.Node.(*ast.ObjectList).Filter("group")
 
-	expected := "3:1: dev is duplicate"
+	expected := "3:13: dev is duplicate"
 	_, actual := parseGroupConfig(list)
 	if expected != actual.Error() {
 		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
@@ -118,7 +118,7 @@ func TestPolicyGroupConfig(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list := obj.Node.(*ast.ObjectList)
+	list := obj.Node.(*ast.ObjectList).Filter("policy")
 
 	expected := map[string]*Policy{
 		"alice_db_writable": &Policy{
@@ -147,9 +147,9 @@ func TestParsePolicyConfig_emptyName(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list := obj.Node.(*ast.ObjectList)
+	list := obj.Node.(*ast.ObjectList).Filter("policy")
 
-	expected := "2:1: policy must be contained name"
+	expected := "2:8: policy must be contained name"
 	_, actual := parsePolicyConfig(list)
 	if expected != actual.Error() {
 		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
@@ -162,9 +162,9 @@ func TestParsePolicyConfig_duplicateName(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list := obj.Node.(*ast.ObjectList)
+	list := obj.Node.(*ast.ObjectList).Filter("policy")
 
-	expected := "3:1: alice_db_writable is duplicate"
+	expected := "3:28: alice_db_writable is duplicate"
 	_, actual := parsePolicyConfig(list)
 	if expected != actual.Error() {
 		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
@@ -177,7 +177,7 @@ func TestUserGroupConfig(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list := obj.Node.(*ast.ObjectList)
+	list := obj.Node.(*ast.ObjectList).Filter("user")
 
 	expected := map[string]*User{
 		"cat": &User{Group: "core"},
@@ -199,9 +199,9 @@ func TestParseUserConfig_emptyName(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list := obj.Node.(*ast.ObjectList)
+	list := obj.Node.(*ast.ObjectList).Filter("user")
 
-	expected := "2:1: user must be contained name"
+	expected := "2:6: user must be contained name"
 	_, actual := parseUserConfig(list)
 	if expected != actual.Error() {
 		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
@@ -214,9 +214,9 @@ func TestParseUserConfig_duplicateName(t *testing.T) {
 		t.Fatalf("got an err: %s", err.Error())
 	}
 
-	list := obj.Node.(*ast.ObjectList)
+	list := obj.Node.(*ast.ObjectList).Filter("user")
 
-	expected := "3:1: cat is duplicate"
+	expected := "3:12: cat is duplicate"
 	_, actual := parseUserConfig(list)
 	if expected != actual.Error() {
 		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())

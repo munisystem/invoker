@@ -14,8 +14,8 @@ func parseDatabaseConfig(list *ast.ObjectList) (map[string]*Database, error) {
 
 	databases := make(map[string]*Database)
 	for _, item := range list.Items {
-		if len(item.Keys) != 2 {
-			return nil, fmt.Errorf("%s: database must be contained name", item.Pos())
+		if len(item.Keys) != 1 {
+			return nil, fmt.Errorf("%s: database must be contained name", item.Val.Pos())
 		}
 
 		var d Database
@@ -23,9 +23,9 @@ func parseDatabaseConfig(list *ast.ObjectList) (map[string]*Database, error) {
 			return nil, err
 		}
 
-		name := item.Keys[1].Token.Value().(string)
+		name := item.Keys[0].Token.Value().(string)
 		if _, exists := databases[name]; exists {
-			return nil, fmt.Errorf("%s: %s is duplicate", item.Pos(), name)
+			return nil, fmt.Errorf("%s: %s is duplicate", item.Val.Pos(), name)
 		}
 
 		databases[name] = &d
@@ -41,8 +41,8 @@ func parseGroupConfig(list *ast.ObjectList) (map[string]*Group, error) {
 
 	groups := make(map[string]*Group)
 	for _, item := range list.Items {
-		if len(item.Keys) != 2 {
-			return nil, fmt.Errorf("%s: group must be contained name", item.Pos())
+		if len(item.Keys) != 1 {
+			return nil, fmt.Errorf("%s: group must be contained name", item.Val.Pos())
 		}
 
 		var g Group
@@ -50,9 +50,9 @@ func parseGroupConfig(list *ast.ObjectList) (map[string]*Group, error) {
 			return nil, err
 		}
 
-		name := item.Keys[1].Token.Value().(string)
+		name := item.Keys[0].Token.Value().(string)
 		if _, exists := groups[name]; exists {
-			return nil, fmt.Errorf("%s: %s is duplicate", item.Pos(), name)
+			return nil, fmt.Errorf("%s: %s is duplicate", item.Val.Pos(), name)
 		}
 
 		groups[name] = &g
@@ -68,8 +68,8 @@ func parsePolicyConfig(list *ast.ObjectList) (map[string]*Policy, error) {
 
 	policies := make(map[string]*Policy)
 	for _, item := range list.Items {
-		if len(item.Keys) != 2 {
-			return nil, fmt.Errorf("%s: policy must be contained name", item.Pos())
+		if len(item.Keys) != 1 {
+			return nil, fmt.Errorf("%s: policy must be contained name", item.Val.Pos())
 		}
 
 		var p Policy
@@ -77,9 +77,9 @@ func parsePolicyConfig(list *ast.ObjectList) (map[string]*Policy, error) {
 			return nil, err
 		}
 
-		name := item.Keys[1].Token.Value().(string)
+		name := item.Keys[0].Token.Value().(string)
 		if _, exists := policies[name]; exists {
-			return nil, fmt.Errorf("%s: %s is duplicate", item.Pos(), name)
+			return nil, fmt.Errorf("%s: %s is duplicate", item.Val.Pos(), name)
 		}
 
 		policies[name] = &p
@@ -95,8 +95,8 @@ func parseUserConfig(list *ast.ObjectList) (map[string]*User, error) {
 
 	users := make(map[string]*User)
 	for _, item := range list.Items {
-		if len(item.Keys) != 2 {
-			return nil, fmt.Errorf("%s: user must be contained name", item.Pos())
+		if len(item.Keys) != 1 {
+			return nil, fmt.Errorf("%s: user must be contained name", item.Val.Pos())
 		}
 
 		var u User
@@ -104,9 +104,9 @@ func parseUserConfig(list *ast.ObjectList) (map[string]*User, error) {
 			return nil, err
 		}
 
-		name := item.Keys[1].Token.Value().(string)
+		name := item.Keys[0].Token.Value().(string)
 		if _, exists := users[name]; exists {
-			return nil, fmt.Errorf("%s: %s is duplicate", item.Pos(), name)
+			return nil, fmt.Errorf("%s: %s is duplicate", item.Val.Pos(), name)
 		}
 
 		users[name] = &u
