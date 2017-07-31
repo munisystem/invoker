@@ -1,8 +1,6 @@
 package config
 
 import (
-	"io/ioutil"
-	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -10,13 +8,7 @@ import (
 const fixtureDir = "fixture"
 
 func TestLoadHcl(t *testing.T) {
-	path := filepath.Join(fixtureDir, "database.hcl")
-	b, err := ioutil.ReadFile(path)
-	if err != nil {
-		t.Fatalf("got an err: %s", err.Error())
-	}
-
-	list, err := loadHcl(string(b))
+	list, err := loadHcl(databaseRawString)
 	if err != nil {
 		t.Fatalf("got an err: %s", err.Error())
 	}
@@ -30,15 +22,24 @@ func TestLoadHcl(t *testing.T) {
 }
 
 func TestLoadHcl_badFile(t *testing.T) {
-	path := filepath.Join(fixtureDir, "nope.hcl")
-	b, err := ioutil.ReadFile(path)
-	if err != nil {
-		t.Fatalf("got an err: %s", err.Error())
-	}
-
-	expected := "At 1:5: illegal char"
-	_, actual := loadHcl(string(b))
+	expected := "At 2:5: illegal char"
+	_, actual := loadHcl(nopeRawString)
 	if expected != actual.Error() {
 		t.Fatalf("didn't match err: expected %s, actual %s", expected, actual.Error())
 	}
 }
+
+const databaseRawString = `
+database "alice_db" {
+  endpoint = "alice.example.com"
+  port = 5432
+  user = "admin"
+  password = "admin"
+  database_name = "apple"
+}
+`
+
+const nopeRawString = `
+nope:
+  body: "It looks like JSON"
+`

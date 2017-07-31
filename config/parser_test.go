@@ -171,7 +171,7 @@ func TestParsePolicyConfig_duplicateName(t *testing.T) {
 	}
 }
 
-func TestUserGroupConfig(t *testing.T) {
+func TestParseUserConfig(t *testing.T) {
 	obj, err := hcl.Parse(user)
 	if err != nil {
 		t.Fatalf("got an err: %s", err.Error())
