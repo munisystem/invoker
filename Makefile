@@ -19,12 +19,19 @@ clean:
 	rm -rf vendor/*
 
 .PHONY: deps
-deps: dep
-	dep ensure
+deps: glide
+	# dep ensure
+	glide install
 
 .PHONY: dep
 dep:
 	go get -u github.com/golang/dep/cmd/dep
+
+.PHONY: glide
+glide:
+ifeq ($(shell command -v glide 2> /dev/null),)
+	curl https://glide.sh/get | sh
+endif
 
 .PHONY: install
 install:
@@ -35,5 +42,6 @@ test:
 	go test -cover -v `go list ./... | grep -v /vendor/`
 
 .PHONY: update-deps
-update-deps: dep
-	dep ensure -update
+update-deps: glide
+	# dep ensure -update
+	glide install

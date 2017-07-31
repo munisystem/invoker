@@ -1,0 +1,10 @@
+package: github.com/munisystem/invoker
+import:
+- package: github.com/hashicorp/hcl
+  subpackages:
+  - hcl/ast
+- package: github.com/lib/pq
+- package: github.com/mitchellh/cli
+testImport:
+- package: gopkg.in/ory-am/dockertest.v3
+  version: 3.0.9
