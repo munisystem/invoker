@@ -1,11 +1,57 @@
 package config
 
 import (
+	"path/filepath"
 	"reflect"
 	"testing"
 )
 
 const fixtureDir = "fixture"
+
+func TestLoadFile(t *testing.T) {
+	path := filepath.Join(fixtureDir, "mixed_keys.hcl")
+
+	expected := &Config{
+		Databases: map[string]*Database{
+			"alice_db": &Database{
+				Endpoint:     "alice.example.com",
+				Port:         5432,
+				User:         "admin",
+				Password:     "admin",
+				DatabaseName: "apple",
+			},
+		},
+		Groups: map[string]*Group{
+			"dev": &Group{
+				Policies: []string{"alice_db_readonly"},
+			},
+		},
+		Policies: map[string]*Policy{
+			"alice_db_readonly": &Policy{
+				Database: "alice_db",
+				Queries: []string{
+					"CREATE ROLE {{ .Name }} WITH LOGIN ENCRYPTED PASSWORD {{ .Password }};",
+					"GRANT SELECT ON ALL TABLES IN SCHEMA public TO {{ .Name }};",
+					"GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO {{ .Name }};",
+				},
+			},
+		},
+		Users: map[string]*User{
+			"alice": &User{
+				Group: "dev",
+			},
+		},
+	}
+
+	actual, err := LoadFile(path)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("didn't match struct: expected %v, actual %v", expected, actual)
+	}
+}
 
 func TestLoadHcl(t *testing.T) {
 	list, err := loadHcl(databaseRawString)
