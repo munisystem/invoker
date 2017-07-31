@@ -6,8 +6,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const RETRY = 10
-
 type PostgreSQL struct {
 	ConnectionURL string
 	db            *sql.DB
