@@ -53,3 +53,37 @@ func (d *DynamoDB) CreateTable(name string) error {
 
 	return nil
 }
+
+func (d *DynamoDB) Insert(table, user string, items map[string]string) error {
+	var writeRequests []*dynamodb.WriteRequest
+
+	for key, value := range items {
+		wr := &dynamodb.WriteRequest{
+			PutRequest: &dynamodb.PutRequest{
+				Item: map[string]*dynamodb.AttributeValue{
+					"user": {
+						S: aws.String(user),
+					},
+					"database": {
+						S: aws.String(key),
+					},
+					"password": {
+						S: aws.String(value),
+					},
+				},
+			},
+		}
+
+		writeRequests = append(writeRequests, wr)
+	}
+
+	input := &dynamodb.BatchWriteItemInput{
+		RequestItems: map[string][]*dynamodb.WriteRequest{table: writeRequests},
+	}
+
+	if _, err := d.Service.BatchWriteItem(input); err != nil {
+		return fmt.Errorf("Faild to insert items to DynamoDB (table: %s): %s", table, err.Error())
+	}
+
+	return nil
+}
