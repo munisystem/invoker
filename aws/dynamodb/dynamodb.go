@@ -87,3 +87,34 @@ func (d *DynamoDB) Insert(table, user string, items map[string]string) error {
 
 	return nil
 }
+
+func (d *DynamoDB) Delete(table, user string, databases []string) error {
+	var deleteRequests []*dynamodb.WriteRequest
+
+	for _, database := range databases {
+		dr := &dynamodb.WriteRequest{
+			DeleteRequest: &dynamodb.DeleteRequest{
+				Key: map[string]*dynamodb.AttributeValue{
+					"user": {
+						S: aws.String(user),
+					},
+					"database": {
+						S: aws.String(database),
+					},
+				},
+			},
+		}
+
+		deleteRequests = append(deleteRequests, dr)
+	}
+
+	input := &dynamodb.BatchWriteItemInput{
+		RequestItems: map[string][]*dynamodb.WriteRequest{table: deleteRequests},
+	}
+
+	if _, err := d.Service.BatchWriteItem(input); err != nil {
+		return fmt.Errorf("Faild to delete items to DynamoDB (table: %s): %s", table, err.Error())
+	}
+
+	return nil
+}

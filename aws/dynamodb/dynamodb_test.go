@@ -181,3 +181,58 @@ func TestInsert(t *testing.T) {
 		t.Fatalf("didn't match Items: expected %s, actual %s", expected, actual.Items)
 	}
 }
+
+func TestDelete(t *testing.T) {
+	cleanup, addr := prepareDynamoDBContainer(t)
+	defer cleanup()
+
+	sess := session.Must(session.NewSession(&aws.Config{
+		Credentials: credentials.NewStaticCredentials("dummy", "dummy", ""),
+		Region:      aws.String(endpoints.ApNortheast1RegionID),
+		Endpoint:    aws.String(addr),
+	}))
+
+	d := &DynamoDB{Service: dynamodb.New(sess)}
+	if err := d.CreateTable("test"); err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	input := map[string]string{
+		"alice_db": "applepie",
+		"bob_db":   "bananatart",
+	}
+
+	if err := d.Insert("test", "alice", input); err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	if err := d.Delete("test", "alice", []string{"alice_db", "bob_db"}); err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	svc := dynamodb.New(sess)
+
+	param := &dynamodb.QueryInput{
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":user": {
+				S: aws.String("alice"),
+			},
+		},
+		ExpressionAttributeNames: map[string]*string{
+			"#user": aws.String("user"),
+		},
+		KeyConditionExpression: aws.String("#user = :user"),
+		TableName:              aws.String("test"),
+	}
+
+	expected := []map[string]*dynamodb.AttributeValue{}
+
+	actual, err := svc.Query(param)
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	if !reflect.DeepEqual(expected, actual.Items) {
+		t.Fatalf("didn't match Items: expected %s, actual %s", expected, actual.Items)
+	}
+}
