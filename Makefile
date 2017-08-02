@@ -41,6 +41,17 @@ install:
 test:
 	go test -cover -v `go list ./... | grep -v /vendor/`
 
+.PHONY: ci-test
+ci-test:
+	echo "" > coverage.txt
+	for d in $$(go list ./... | grep -v /vendor/); do \
+		go test -coverprofile=profile.out -covermode=atomic -race -v $$d; \
+		if [ -f profile.out ]; then \
+			cat profile.out >> coverage.txt; \
+			rm profile.out; \
+		fi; \
+	done
+
 .PHONY: update-deps
 update-deps: glide
 	# dep ensure -update

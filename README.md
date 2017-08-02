@@ -1,5 +1,5 @@
 # invoker
-[![Build Status](https://travis-ci.org/munisystem/invoker.svg?branch=master)](https://travis-ci.org/munisystem/invoker)
+[![Build Status](https://travis-ci.org/munisystem/invoker.svg?branch=master)](https://travis-ci.org/munisystem/invoker) [![codecov](https://codecov.io/gh/munisystem/invoker/branch/master/graph/badge.svg)](https://codecov.io/gh/munisystem/invoker)
 
 
 ## Description
