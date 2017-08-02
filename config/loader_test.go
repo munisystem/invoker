@@ -73,7 +73,7 @@ func TestLoadFile(t *testing.T) {
 		},
 	}
 
-	actual, err := LoadFile(path)
+	actual, err := loadFile(path)
 	if err != nil {
 		t.Fatalf("got an err: %s", err.Error())
 	}

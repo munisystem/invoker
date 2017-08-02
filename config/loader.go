@@ -24,7 +24,7 @@ func LoadDir(root string) (*Config, error) {
 			continue
 		}
 
-		c, err := LoadFile(filepath.Join(root, name))
+		c, err := loadFile(filepath.Join(root, name))
 		if err != nil {
 			return nil, err
 		}
@@ -37,7 +37,7 @@ func LoadDir(root string) (*Config, error) {
 	return config, nil
 }
 
-func LoadFile(path string) (*Config, error) {
+func loadFile(path string) (*Config, error) {
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
