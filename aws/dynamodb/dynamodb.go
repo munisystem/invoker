@@ -118,3 +118,33 @@ func (d *DynamoDB) Delete(table, user string, databases []string) error {
 
 	return nil
 }
+
+func (d *DynamoDB) Get(table, user string) (map[string]string, error) {
+	param := &dynamodb.QueryInput{
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":user": {
+				S: aws.String(user),
+			},
+		},
+		ExpressionAttributeNames: map[string]*string{
+			"#user": aws.String("user"),
+		},
+		KeyConditionExpression: aws.String("#user = :user"),
+		TableName:              aws.String("test"),
+	}
+
+	result, err := d.Service.Query(param)
+	if err != nil {
+		return nil, fmt.Errorf("Faild to get items from DynamoDB (table: %s): %s", table, err.Error())
+	}
+
+	items := make(map[string]string)
+
+	for _, item := range result.Items {
+		database := *item["database"].S
+		password := *item["password"].S
+		items[database] = password
+	}
+
+	return items, nil
+}

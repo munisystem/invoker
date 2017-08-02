@@ -236,3 +236,37 @@ func TestDelete(t *testing.T) {
 		t.Fatalf("didn't match Items: expected %s, actual %s", expected, actual.Items)
 	}
 }
+
+func TestGet(t *testing.T) {
+	cleanup, addr := prepareDynamoDBContainer(t)
+	defer cleanup()
+
+	sess := session.Must(session.NewSession(&aws.Config{
+		Credentials: credentials.NewStaticCredentials("dummy", "dummy", ""),
+		Region:      aws.String(endpoints.ApNortheast1RegionID),
+		Endpoint:    aws.String(addr),
+	}))
+
+	d := &DynamoDB{Service: dynamodb.New(sess)}
+	if err := d.CreateTable("test"); err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	expected := map[string]string{
+		"alice_db": "applepie",
+		"bob_db":   "bananatart",
+	}
+
+	if err := d.Insert("test", "alice", expected); err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	actual, err := d.Get("test", "alice")
+	if err != nil {
+		t.Fatalf("got an err: %s", err.Error())
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("didn't match map: expected %s, actual %s", expected, actual)
+	}
+}
