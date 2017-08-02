@@ -7,7 +7,7 @@ var (
 )
 
 func Session() *session.Session {
-	if sess != nil {
+	if sess == nil {
 		sess = session.Must(session.NewSession())
 	}
 
