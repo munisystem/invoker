@@ -16,12 +16,12 @@ func preparePostgreSQLContainer(t *testing.T) {
 	var err error
 	pool, err = dockertest.NewPool("")
 	if err != nil {
-		t.Fatalf("Cound not connect docker host: %s", err.Error())
+		t.Fatalf("couldn't connect docker host: %s", err.Error())
 	}
 
 	resource, err = pool.Run("postgres", "9.6", []string{"POSTGRES_PASSWORD=secret"})
 	if err != nil {
-		t.Fatalf("Cound not start PostgreSQL container: %s", err.Error())
+		t.Fatalf("couldn't start PostgreSQL container: %s", err.Error())
 	}
 
 	if err = pool.Retry(func() error {
@@ -32,13 +32,13 @@ func preparePostgreSQLContainer(t *testing.T) {
 		}
 		return db.Ping()
 	}); err != nil {
-		t.Fatalf("Cound not prepare PostgreSQL container: %s", err.Error())
+		t.Fatalf("couldn't prepare PostgreSQL container: %s", err.Error())
 	}
 }
 
 func cleanupPostgreSQLContainer(t *testing.T) {
 	if err := pool.Purge(resource); err != nil {
-		t.Fatalf("Cound not cleanup PostgreSQL container: %s", err.Error())
+		t.Fatalf("couldn't cleanup PostgreSQL container: %s", err.Error())
 	}
 }
 
