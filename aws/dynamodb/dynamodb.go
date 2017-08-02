@@ -82,7 +82,7 @@ func (d *DynamoDB) Insert(table, user string, items map[string]string) error {
 	}
 
 	if _, err := d.Service.BatchWriteItem(input); err != nil {
-		return fmt.Errorf("Faild to insert items to DynamoDB (table: %s): %s", table, err.Error())
+		return fmt.Errorf("Faild to insert items into DynamoDB (table: %s): %s", table, err.Error())
 	}
 
 	return nil
@@ -113,7 +113,7 @@ func (d *DynamoDB) Delete(table, user string, databases []string) error {
 	}
 
 	if _, err := d.Service.BatchWriteItem(input); err != nil {
-		return fmt.Errorf("Faild to delete items to DynamoDB (table: %s): %s", table, err.Error())
+		return fmt.Errorf("Faild to delete items from DynamoDB (table: %s): %s", table, err.Error())
 	}
 
 	return nil
