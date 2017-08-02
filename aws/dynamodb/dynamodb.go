@@ -22,7 +22,7 @@ func (d *DynamoDB) CreateTable(name string) error {
 	input := &dynamodb.CreateTableInput{
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
 			{
-				AttributeName: aws.String("name"),
+				AttributeName: aws.String("user"),
 				AttributeType: aws.String("S"),
 			},
 			{
@@ -32,7 +32,7 @@ func (d *DynamoDB) CreateTable(name string) error {
 		},
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{
-				AttributeName: aws.String("name"),
+				AttributeName: aws.String("user"),
 				KeyType:       aws.String("HASH"),
 			},
 			{

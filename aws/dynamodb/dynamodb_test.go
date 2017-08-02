@@ -71,7 +71,7 @@ func TestCreateTable(t *testing.T) {
 
 	expectedAttr := []*dynamodb.AttributeDefinition{
 		{
-			AttributeName: aws.String("name"),
+			AttributeName: aws.String("user"),
 			AttributeType: aws.String("S"),
 		},
 		{
@@ -82,7 +82,7 @@ func TestCreateTable(t *testing.T) {
 
 	expectedSchema := []*dynamodb.KeySchemaElement{
 		{
-			AttributeName: aws.String("name"),
+			AttributeName: aws.String("user"),
 			KeyType:       aws.String("HASH"),
 		},
 		{
