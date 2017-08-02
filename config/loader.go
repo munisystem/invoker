@@ -34,6 +34,10 @@ func LoadDir(root string) (*Config, error) {
 		}
 	}
 
+	if err := config.CheckDependencies(); err != nil {
+		return nil, err
+	}
+
 	return config, nil
 }
 
