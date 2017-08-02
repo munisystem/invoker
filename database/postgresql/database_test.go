@@ -8,25 +8,29 @@ import (
 	dockertest "gopkg.in/ory-am/dockertest.v3"
 )
 
-var pool *dockertest.Pool
-var resource *dockertest.Resource
-var db *sql.DB
-
-func preparePostgreSQLContainer(t *testing.T) {
-	var err error
-	pool, err = dockertest.NewPool("")
+func preparePostgreSQLContainer(t *testing.T) (func(), string, *sql.DB) {
+	pool, err := dockertest.NewPool("")
 	if err != nil {
 		t.Fatalf("couldn't connect docker host: %s", err.Error())
 	}
 
-	resource, err = pool.Run("postgres", "9.6", []string{"POSTGRES_PASSWORD=secret"})
+	resource, err := pool.Run("postgres", "9.6", []string{"POSTGRES_PASSWORD=secret"})
 	if err != nil {
 		t.Fatalf("couldn't start PostgreSQL container: %s", err.Error())
 	}
 
+	addr := fmt.Sprintf("postgres://postgres:secret@localhost:%s?sslmode=disable", resource.GetPort("5432/tcp"))
+
+	cleanup := func() {
+		if err := pool.Purge(resource); err != nil {
+			t.Fatalf("couldn't cleanup PostgreSQL container: %s", err.Error())
+		}
+	}
+
+	var db *sql.DB
 	if err = pool.Retry(func() error {
 		var err error
-		db, err = sql.Open("postgres", fmt.Sprintf("postgres://postgres:secret@localhost:%s?sslmode=disable", resource.GetPort("5432/tcp")))
+		db, err = sql.Open("postgres", addr)
 		if err != nil {
 			return err
 		}
@@ -34,19 +38,15 @@ func preparePostgreSQLContainer(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("couldn't prepare PostgreSQL container: %s", err.Error())
 	}
-}
 
-func cleanupPostgreSQLContainer(t *testing.T) {
-	if err := pool.Purge(resource); err != nil {
-		t.Fatalf("couldn't cleanup PostgreSQL container: %s", err.Error())
-	}
+	return cleanup, addr, db
 }
 
 func TestRunQueries(t *testing.T) {
-	preparePostgreSQLContainer(t)
-	defer cleanupPostgreSQLContainer(t)
+	cleanup, addr, db := preparePostgreSQLContainer(t)
+	defer cleanup()
 
-	pg := Initialize(fmt.Sprintf("postgres://postgres:secret@localhost:%s?sslmode=disable", resource.GetPort("5432/tcp")))
+	pg := Initialize(addr)
 	if err := pg.RunQueries(TestQueries); err != nil {
 		t.Fatalf("got an err: %s", err.Error())
 	}
